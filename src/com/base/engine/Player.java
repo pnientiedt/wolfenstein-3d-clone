@@ -2,7 +2,8 @@ package com.base.engine;
 
 public class Player {
 	private static final float MOUSE_SENSITIVITY = 0.5f;
-	private static final float MOVE_SPEED = 10f;
+	private static final float MOVE_SPEED = 8f;
+	private static final float PLAYER_SIZE = 0.2f;
 	private static final Vector3f zeroVector = new Vector3f(0,0,0);
 	
 	private Camera camera;
@@ -16,8 +17,6 @@ public class Player {
 	}
 
 	public void input() {
-		float sensitivity = 0.5f;
-		float movAmt = (float) (10 * Time.getDelta());
 		// float rotAmt = (float)(100 * Time.getDelta());
 
 		if (Input.getKey(Input.KEY_ESCAPE)) {
@@ -40,12 +39,6 @@ public class Player {
 			movementVector = movementVector.add(camera.getLeft());//camera.move(camera.getLeft(), movAmt);
 		if (Input.getKey(Input.KEY_D))
 			movementVector = movementVector.add(camera.getRight());//camera.move(camera.getRight(), movAmt);
-
-		movementVector.setY(0);
-		if (movementVector.length() > 0)
-		movementVector = movementVector.normalized();
-		
-		camera.move(movementVector, movAmt);
 		
 		if (mouseLocked) {
 			Vector2f deltaPos = Input.getMousePosition().sub(centerPosition);
@@ -53,10 +46,10 @@ public class Player {
 			boolean rotY = deltaPos.getX() != 0;
 			boolean rotX = deltaPos.getY() != 0;
 
-			if (rotY)
-				camera.rotateY(deltaPos.getX() * sensitivity);
-			if (rotX)
-				camera.rotateX(-deltaPos.getY() * sensitivity);
+			if(rotY)
+				camera.rotateY(deltaPos.getX() * MOUSE_SENSITIVITY);
+				if(rotX)
+				camera.rotateX(-deltaPos.getY() * MOUSE_SENSITIVITY);
 
 			if (rotY || rotX)
 				Input.setMousePosition(centerPosition);
@@ -64,7 +57,18 @@ public class Player {
 	}
 
 	public void update() {
+		float movAmt = (float)(MOVE_SPEED * Time.getDelta());
+		movementVector.setY(0);
+		if (movementVector.length() > 0)
+			movementVector = movementVector.normalized();
 
+		Vector3f oldPos = camera.getPos();
+		Vector3f newPos = oldPos.add(movementVector.mul(movAmt));
+		
+		Vector3f collisionVector = Game.getLevel().checkCollision(oldPos, newPos, PLAYER_SIZE, PLAYER_SIZE);
+		movementVector = movementVector.mul(collisionVector);
+		
+		camera.move(movementVector, movAmt);
 	}
 
 	public void render() {
