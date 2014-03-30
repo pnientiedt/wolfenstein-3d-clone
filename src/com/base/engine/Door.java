@@ -2,18 +2,28 @@ package com.base.engine;
 
 public class Door {
 	
-	public static final float LENGTH = 1;
-	private static final float HEIGHT = 1;
-	public static final float WIDTH = 0.125f;
-	private static final float START = 0;
+	public final static float LENGTH = 1;
+	private final static float HEIGHT = 1;
+	public final static float WIDTH = 0.125f;
+	private final static float START = 0;
+	private final static double TIME_TO_OPEN = 1.0;
+	private final static double CLOSE_DELAY = 2.0;
 	
 	private static Mesh mesh;
 	private Material material;
 	private Transform transform;
 	
+	private boolean isOpening;
+	private double openingStartTime;
+	private double openTime;
+	private double closingStartTime;
+	private double closeTime;
+	
 	public Door(Transform transform, Material material) {
 		this.transform = transform;
 		this.material = material;
+		isOpening = false;
+		
 		if(mesh == null) {
 			//NOTE: You may need to add top/bottom face
 			
@@ -51,6 +61,16 @@ public class Door {
 			
 			mesh = new Mesh(vertices, indices);
 		}
+	}
+	
+	public void open() {
+		if (isOpening)
+			return;
+		
+		openingStartTime = (double)Time.getTime()/(double)Time.SECOND;
+		openTime = openingStartTime + TIME_TO_OPEN;
+		closeTime = openTime + CLOSE_DELAY;
+		isOpening = true;
 	}
 	
 	public void update() {

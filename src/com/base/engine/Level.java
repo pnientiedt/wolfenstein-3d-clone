@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 public class Level {
 
-	private static final float SPOT_WIDTH = 1;
-	private static final float SPOT_LENGTH = 1;
-	private static final float SPOT_HEIGHT = 1;
+	private final static float SPOT_WIDTH = 1;
+	private final static float SPOT_LENGTH = 1;
+	private final static float SPOT_HEIGHT = 1;
 
-	private static final int NUM_TEX_EXP = 4;
-	private static final int NUM_TEXTURES = (int) Math.pow(2, NUM_TEX_EXP);
+	private final static int NUM_TEX_EXP = 4;
+	private final static int NUM_TEXTURES = (int) Math.pow(2, NUM_TEX_EXP);
 
 	private Mesh mesh;
 	private Bitmap level;
@@ -70,11 +70,13 @@ public class Level {
 				}
 			}
 			
-//			Vector2f doorSize = new Vector2f(Door.LENGTH, Door.WIDTH);
-//			
-//			Vector3f doorPos3f = door.getTransform().getTranslation();
-//			Vector2f doorPos2f = new Vector2f(doorPos3f.getX(), doorPos3f.getZ());
-//			collisionVector = collisionVector.mul(rectCollide(oldPos2, newPos2, objectSize, doorPos2f, doorSize));
+			Vector2f doorSize = new Vector2f(Door.LENGTH, Door.WIDTH);
+			
+			for (Door door : doors) {
+				Vector3f doorPos3f = door.getTransform().getTranslation();
+				Vector2f doorPos2f = new Vector2f(doorPos3f.getX(), doorPos3f.getZ());
+				collisionVector = collisionVector.mul(rectCollide(oldPos2, newPos2, objectSize, doorPos2f, doorSize));
+			}
 		}
 		
 		return new Vector3f(collisionVector.getX(), 0, collisionVector.getY());
