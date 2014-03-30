@@ -2,7 +2,7 @@ package com.base.engine;
 
 public class Player {
 	private final static float MOUSE_SENSITIVITY = 0.5f;
-	private final static float MOVE_SPEED = 8f;
+	private final static float MOVE_SPEED = 5f;
 	private final static float PLAYER_SIZE = 0.2f;
 	private final static Vector3f zeroVector = new Vector3f(0,0,0);
 	
