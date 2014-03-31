@@ -21,6 +21,8 @@ public class Level {
 	private Player player;
 	
 	private ArrayList<Door> doors;
+	
+	private Monster monster;
 
 	public Level(String levelName, String textureName, Player player) {
 		this.player = player;
@@ -30,10 +32,14 @@ public class Level {
 
 		shader = BasicShader.getInstance();
 
-		
 		doors = new ArrayList<Door>();
 		
 		generateLevel();
+		
+		Transform tempTransform = new Transform();
+		tempTransform.setTranslation(new Vector3f(13,0,13));
+		
+		monster = new Monster(tempTransform);
 	}
 
 	public void input() {
@@ -52,6 +58,7 @@ public class Level {
 			door.update();
 		}
 		player.update();
+		monster.update();
 	}
 
 	public void render() {
@@ -62,6 +69,7 @@ public class Level {
 			door.render();
 		}
 		player.render();
+		monster.render();
 	}
 	
 	public Vector3f checkCollision(Vector3f oldPos, Vector3f newPos, float objectWidht, float objectLength) {
