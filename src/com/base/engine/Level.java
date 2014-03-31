@@ -41,14 +41,19 @@ public class Level {
 		
 		monster = new Monster(tempTransform);
 	}
+	
+	public void openDoors(Vector3f position) {
+
+		for (Door door : doors) {
+			if (door.getTransform().getTranslation().sub(position).length() < OPEN_DISTANCE) {
+				door.open();
+			}
+		}
+	}
 
 	public void input() {
 		if (Input.getKeyDown(Input.KEY_E)) {
-			for(Door door: doors) {
-				if (door.getTransform().getTranslation().sub(player.getCamera().getPos()).length() < OPEN_DISTANCE) {
-					door.open();
-				}
-			}
+			openDoors(player.getCamera().getPos());
 		}
 		player.input();
 	}
