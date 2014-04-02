@@ -22,6 +22,9 @@ public class Level {
 	
 	private ArrayList<Door> doors;
 	
+	private ArrayList<Vector2f> collisionPosStart;
+	private ArrayList<Vector2f> collisionPosEnd;
+	
 	private Monster monster;
 
 	public Level(String levelName, String textureName, Player player) {
@@ -33,6 +36,9 @@ public class Level {
 		shader = BasicShader.getInstance();
 
 		doors = new ArrayList<Door>();
+		
+		collisionPosStart = new ArrayList<Vector2f>();
+		collisionPosEnd = new ArrayList<Vector2f>();
 		
 		generateLevel();
 		
@@ -105,6 +111,13 @@ public class Level {
 		}
 		
 		return new Vector3f(collisionVector.getX(), 0, collisionVector.getY());
+	}
+	
+	public Vector2f checkIntersection(Vector2f lineStart, Vector2f lineEnd) {
+		Vector2f nerestIntersection = null;
+		
+		return nerestIntersection;
+		
 	}
 	
 	private Vector2f rectCollide(Vector2f oldPos, Vector2f newPos, Vector2f size1, Vector2f pos2, Vector2f size2) {
@@ -240,6 +253,7 @@ public class Level {
 
 				// Generate Walls
 				if ((level.getPixel(i, j - 1) & 0xFFFFFF) == 0) {
+					collisionPosStart.add(new Vector2f(i * SPOT_WIDTH, j * SPOT_LENGTH));
 					addFace(indices, vertices.size(), false);
 					addVertices(vertices, i, 0, j, true, true, false, texCoords);
 				}
