@@ -1,5 +1,7 @@
 package com.base.engine;
 
+import java.util.Random;
+
 public class Monster {
 	
 	public final static float SCALE = 0.7f;
@@ -28,16 +30,19 @@ public class Monster {
 	public static final float MONSTER_WIDTH = 0.2f;
 	public static final float MONSTER_LENGTH = 0.2f;
 	
-private static final float SHOOT_DISTANCE = 1000f; 
+	public static final float SHOOT_DISTANCE = 1000.0f;
+	public static final float SHOT_ANGLE = 10.0f;
 	
 	private static Mesh mesh;
 	private Material material;
 	private Transform transform;
+	private Random rand;
 	private int state;
 	
 	public Monster(Transform transform) {
 		this.transform = transform;
 		this.state = STATE_ATTACK;
+		this.rand = new Random();
 		this.transform.setRotation(this.transform.getRotation().add(new Vector3f(0,0,180)));
 //		this.transform.setTranslation(this.transform.getTranslation().add(new Vector3f(0,0.7f,0)));
 		material = new Material(new Texture("SSWVA1.png"));
@@ -55,14 +60,14 @@ private static final float SHOOT_DISTANCE = 1000f;
 		}
 	}
 	
-	private void idleUpdate(float distance, Vector3f orientation) {
+	private void idleUpdate(Vector3f orientation, float distance) {
 		
 	}
 	
-	private void chaseUpdate(float distance, Vector3f orientation) {
+	private void chaseUpdate(Vector3f orientation, float distance) {
 		if (distance > MOVMENT_STOP_DISTANCE) {
 			
-			float moveAmount = -MOVE_SPEED * (float)Time.getDelta();
+			float moveAmount = MOVE_SPEED * (float)Time.getDelta();
 			
 			Vector3f oldPos = transform.getTranslation();
 			Vector3f newPos = transform.getTranslation().add(orientation.mul(moveAmount));
@@ -80,27 +85,34 @@ private static final float SHOOT_DISTANCE = 1000f;
 		}
 	}
 	
-	private void attackUpdate(float distance, Vector3f orientation) {
+	private void attackUpdate(Vector3f orientation, float distance) {
 		Vector2f lineStart = new Vector2f(transform.getTranslation().getX(), transform.getTranslation().getZ());
-		Vector2f castDirection = new Vector2f(orientation.getX(), orientation.getZ());
+		Vector2f castDirection = new Vector2f(orientation.getX(), orientation.getZ()).rotate((rand.nextFloat() - 0.5f) * SHOT_ANGLE);
 		Vector2f lineEnd = lineStart.add(castDirection.mul(SHOOT_DISTANCE));
-		
-		Vector2f collisionVector = Game.getLevel().checkIntersection(lineStart, lineEnd);
-		
-		if (collisionVector == null) {
-			System.out.println("We've missed everything");
-		} else {
-			System.out.println("We've hit something");
+
+		Vector2f collisionVector = Game.getLevel().checkIntersections(lineStart, lineEnd);
+
+		Vector2f playerIntersectVector = Game.getLevel().lineIntersectRect(lineStart, lineEnd, new Vector2f(Transform.getCamera().getPos().getX(), Transform.getCamera().getPos().getZ()),
+				new Vector2f(Player.PLAYER_SIZE, Player.PLAYER_SIZE));
+
+		if (playerIntersectVector != null && (collisionVector == null || playerIntersectVector.sub(lineStart).length() < collisionVector.sub(lineStart).length())) {
+			System.out.println("We've just shot the player!");
+			state = STATE_CHASE;
 		}
+
+		if (collisionVector == null)
+			System.out.println("We've missed everything!");
+		else
+			System.out.println("We've hit something!");
+	}
+
+
+	
+	private void dyingUpdate(Vector3f orientation, float distance) {
 		
-		state = STATE_CHASE;
 	}
 	
-	private void dyingUpdate(float distance, Vector3f orientation) {
-		
-	}
-	
-	private void deadUpdate(float distance, Vector3f orientation) {
+	private void deadUpdate(Vector3f orientation, float distance) {
 		
 	}
 	
@@ -112,7 +124,7 @@ private static final float SHOOT_DISTANCE = 1000f;
 		
 		float angleToFaceTheCamera = (float) Math.toDegrees(Math.atan(directionToCamera.getZ() / directionToCamera.getX()));
 		
-		if (directionToCamera.getX() > 0) {
+		if( directionToCamera.getX() < 0 ) {
 			angleToFaceTheCamera += 180;
 		}
 		
@@ -120,7 +132,7 @@ private static final float SHOOT_DISTANCE = 1000f;
 	}
 	
 	public void update() {
-		Vector3f directionToCamera = transform.getTranslation().sub(Transform.getCamera().getPos());
+		Vector3f directionToCamera = Transform.getCamera().getPos().sub(transform.getTranslation());
 		
 		float distance = directionToCamera.length();
 		Vector3f orientation = directionToCamera.div(distance);
@@ -129,11 +141,11 @@ private static final float SHOOT_DISTANCE = 1000f;
 		faceCamera(orientation);		
 		
 		switch(state) {
-			case STATE_IDLE: idleUpdate(distance, orientation); break;
-			case STATE_CHASE: chaseUpdate(distance, orientation); break;
-			case STATE_ATTACK: attackUpdate(distance, orientation); break;
-			case STATE_DYING: dyingUpdate(distance, orientation); break;
-			case STATE_DEAD: deadUpdate(distance, orientation); break;
+			case STATE_IDLE: idleUpdate(orientation, distance); break;
+			case STATE_CHASE: chaseUpdate(orientation, distance); break;
+			case STATE_ATTACK: attackUpdate(orientation, distance); break;
+			case STATE_DYING: dyingUpdate(orientation, distance); break;
+			case STATE_DEAD: deadUpdate(orientation, distance); break;
 		}
 	}
 	
