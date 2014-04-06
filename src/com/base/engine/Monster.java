@@ -35,6 +35,9 @@ public class Monster {
 	public static final float SHOT_ANGLE = 10.0f;
 	private static final double ATTACK_CHANCE = 0.5f;
 	private static final int MAX_HEALTH = 100;
+	
+	public static final int DAMAGE_MIN = 5;
+	public static final int DAMAGE_MAX = 30;
 
 	private static Mesh mesh;
 	private Material material;
@@ -68,6 +71,14 @@ public class Monster {
 			mesh = new Mesh(vertices, indices);
 		}
 	}
+	
+	public Transform getTransform() {
+		return transform;
+	}
+	
+	public Vector2f getSize() {
+		return new Vector2f(MONSTER_WIDTH, MONSTER_LENGTH);
+	}
 
 	public void damage(int amt) {
 		if (state == STATE_IDLE) {
@@ -83,7 +94,7 @@ public class Monster {
 		double time = ((double) Time.getTime() / (double) Time.SECOND);
 		double timeDecimals = time - (double) ((int) time);
 
-		if (timeDecimals < 0.5) {
+		if (timeDecimals < 0.3) {
 			canLook = true;
 		} else if (canLook) {
 			Vector2f lineStart = new Vector2f(transform.getTranslation().getX(), transform.getTranslation().getZ());
@@ -94,7 +105,7 @@ public class Monster {
 																							// SHOT_ANGLE);
 			Vector2f lineEnd = lineStart.add(castDirection.mul(SHOOT_DISTANCE));
 
-			Vector2f collisionVector = Game.getLevel().checkIntersections(lineStart, lineEnd);
+			Vector2f collisionVector = Game.getLevel().checkIntersections(lineStart, lineEnd, false);
 
 			Vector2f playerIntersectVector = Game.getLevel().lineIntersectRect(lineStart, lineEnd, new Vector2f(Transform.getCamera().getPos().getX(), Transform.getCamera().getPos().getZ()),
 					new Vector2f(Player.PLAYER_SIZE, Player.PLAYER_SIZE));
@@ -145,19 +156,15 @@ public class Monster {
 			Vector2f castDirection = new Vector2f(orientation.getX(), orientation.getZ()).rotate((rand.nextFloat() - 0.5f) * SHOT_ANGLE);
 			Vector2f lineEnd = lineStart.add(castDirection.mul(SHOOT_DISTANCE));
 
-			Vector2f collisionVector = Game.getLevel().checkIntersections(lineStart, lineEnd);
+			Vector2f collisionVector = Game.getLevel().checkIntersections(lineStart, lineEnd, false);
 
 			Vector2f playerIntersectVector = Game.getLevel().lineIntersectRect(lineStart, lineEnd, new Vector2f(Transform.getCamera().getPos().getX(), Transform.getCamera().getPos().getZ()),
 					new Vector2f(Player.PLAYER_SIZE, Player.PLAYER_SIZE));
 
 			if (playerIntersectVector != null && (collisionVector == null || playerIntersectVector.sub(lineStart).length() < collisionVector.sub(lineStart).length())) {
-				System.out.println("We've just shot the player!");
+				Game.getLevel().damagePlayer(rand.nextInt(DAMAGE_MAX - DAMAGE_MIN) + DAMAGE_MIN);
+				//				System.out.println("We've just shot the player!");
 			}
-
-			if (collisionVector == null)
-				System.out.println("We've missed everything!");
-			else
-				System.out.println("We've hit something!");
 
 			state = STATE_CHASE;
 			canAttack = false;
