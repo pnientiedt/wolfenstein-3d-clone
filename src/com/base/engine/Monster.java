@@ -104,7 +104,7 @@ public class Monster {
 	public void damage(int amt) {
 		if (state == STATE_IDLE)
 			state = STATE_CHASE;
-
+		System.out.println("hit monster with " + amt);
 		health -= amt;
 
 		if (health <= 0)
@@ -128,8 +128,7 @@ public class Monster {
 
 				Vector2f collisionVector = Game.getLevel().checkIntersections(lineStart, lineEnd, false);
 
-				Vector2f playerIntersectVector = Game.getLevel().lineIntersectRect(lineStart, lineEnd, new Vector2f(Transform.getCamera().getPos().getX(), Transform.getCamera().getPos().getZ()),
-						new Vector2f(Player.PLAYER_SIZE, Player.PLAYER_SIZE));
+				Vector2f playerIntersectVector = new Vector2f(Transform.getCamera().getPos().getX(), Transform.getCamera().getPos().getZ());
 
 				if (playerIntersectVector != null && (collisionVector == null || playerIntersectVector.sub(lineStart).length() < collisionVector.sub(lineStart).length())) {
 					state = STATE_CHASE;
@@ -169,7 +168,7 @@ public class Monster {
 				transform.setTranslation(transform.getTranslation().add(movementVector.mul(moveAmount)));
 
 			if (movementVector.sub(orientation).length() != 0)
-				Game.getLevel().openDoors(transform.getTranslation());
+				Game.getLevel().openDoors(transform.getTranslation(), false);
 		} else
 			state = STATE_ATTACK;
 	}
